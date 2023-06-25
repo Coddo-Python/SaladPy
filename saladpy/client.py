@@ -10,7 +10,6 @@ from .methods import Methods
 
 
 class SaladClient(Methods):
-    BASE_API_URL = "https://app-api.salad.com"
     V1_API_URL = "https://app-api.salad.com/api/v1/"
     V2_API_URL = "https://app-api.salad.com/api/v2/"
     AUTH_API_URL = "https://app-api.salad.com/auth/"
@@ -133,12 +132,17 @@ class SaladClient(Methods):
                 return text
 
     async def refresh_token(self):
-        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", proxy=self._DEBUG_PROXY) as r:
+        #TODO: Test refresh token
+        self.temp_cookie_backup = self.cookies
+        cookies = {"sRefreshToken": self.cookies["sRefreshToken"], "sIdRefreshToken": self.cookies["sIdRefreshToken"]}
+        self.http.cookie_jar.clear()
+        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", cookies=cookies, proxy=self._DEBUG_PROXY) as r:
             print(r.status)
             text = await r.text()
             print(text)
-            self.http.cookie_jar.update_cookies(r.cookies)
-            self.http.cookie_jar.save(self.cachePath)
+            if r.status == 200:
+                self.http.cookie_jar.update_cookies(r.cookies)
+                self.http.cookie_jar.save(self.cachePath)
 
     async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None, as_json: bool = False):
         resp = await self._req(api_url, "GET", endpoint, params)
