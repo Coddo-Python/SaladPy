@@ -47,7 +47,7 @@ asyncio.run(main())
 
 Docs
 --------------
-Docs are available at <https://saladpy.gitbook.io/saladpy-docs/>. 
+The docs are available at <https://saladpy.gitbook.io/saladpy-docs/>! 
 
 Contact
 --------------
