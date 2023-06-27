@@ -18,11 +18,11 @@ setup(
         'Issue tracker': 'https://github.com/Coddo-Python/SaladPy/issues',
         'Docs': 'https://saladpy.gitbook.io/saladpy-docs/'
     },
-    version="1.0.2-a.1",
+    version="1.0.2-a.2",
     license='MIT',
     description='A Python wrapper for the Salad Web API',
     long_description=readme,
-    packages=["saladpy"],
+    packages=["saladpy", "saladpy.methods", "saladpy.methods.types"],
     install_requires=requirements,
     python_requires='>=3.8.0',
     classifiers=[
