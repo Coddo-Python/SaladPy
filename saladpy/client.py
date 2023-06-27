@@ -13,7 +13,6 @@ class SaladClient(Methods):
     V1_API_URL = "https://app-api.salad.com/api/v1/"
     V2_API_URL = "https://app-api.salad.com/api/v2/"
     AUTH_API_URL = "https://app-api.salad.com/auth/"
-    _DEBUG_PROXY = "http://localhost:8000"
 
     def __init__(
         self,
@@ -59,7 +58,7 @@ class SaladClient(Methods):
             async with self.http.post(
                 f"{self.V2_API_URL}authentication-sessions",
                 data=payload,
-                headers=headers, proxy=self._DEBUG_PROXY
+                headers=headers
             ) as r:
                 try:
                     assert r.status == 204
@@ -114,7 +113,7 @@ class SaladClient(Methods):
 
     async def _req(self, api_url : str, method: str, endpoint: str, params: Optional[dict] = None):
         async with self.http.request(
-            method, f"{api_url}{endpoint}", params=params, proxy=self._DEBUG_PROXY
+            method, f"{api_url}{endpoint}", params=params
         ) as r:
             text = await r.text()
             try:
@@ -136,7 +135,7 @@ class SaladClient(Methods):
         self.temp_cookie_backup = self.cookies
         cookies = {"sRefreshToken": self.cookies["sRefreshToken"], "sIdRefreshToken": self.cookies["sIdRefreshToken"]}
         self.http.cookie_jar.clear()
-        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", cookies=cookies, proxy=self._DEBUG_PROXY) as r:
+        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", cookies=cookies) as r:
             print(r.status)
             text = await r.text()
             print(text)
@@ -144,18 +143,14 @@ class SaladClient(Methods):
                 self.http.cookie_jar.update_cookies(r.cookies)
                 self.http.cookie_jar.save(self.cachePath)
 
-    async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None, as_json: bool = False):
+    async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None):
         resp = await self._req(api_url, "GET", endpoint, params)
         if resp == 404:
             return resp
-        if as_json:
-            return json.loads(resp)
-        return json.loads(resp, object_hook=lambda d: SimpleNamespace(**d))
+        return json.loads(resp)
 
-    async def _post(self, api_url: str, endpoint: str, params: Optional[dict] = None, as_json: bool = False):
+    async def _post(self, api_url: str, endpoint: str, params: Optional[dict] = None):
         resp = await self._req(api_url, "POST", endpoint, params)
         if resp == 404:
             return resp
-        if as_json:
-            return json.loads(resp)
-        return json.loads(resp, object_hook=lambda d: SimpleNamespace(**d))
+        return json.loads(resp)
