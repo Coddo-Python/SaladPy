@@ -44,3 +44,11 @@ async def main():
 
 asyncio.run(main())
 ```
+
+Docs
+--------------
+Docs are available at <https://saladpy.gitbook.io/saladpy-docs/>. 
+
+Contact
+--------------
+You can contact me at `Coddo#3210` on Discord! Ensure to first send me a friend request.

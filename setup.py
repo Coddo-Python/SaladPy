@@ -16,6 +16,7 @@ setup(
     project_urls={
         'Github': 'https://github.com/Coddo-Python/SaladPy',
         'Issue tracker': 'https://github.com/Coddo-Python/SaladPy/issues',
+        'Docs': 'https://saladpy.gitbook.io/saladpy-docs/'
     },
     version="1.0.2-a.1",
     license='MIT',
