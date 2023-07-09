@@ -118,9 +118,11 @@ class SaladClient(Methods):
                 else:
                     return True
 
-    async def _req(self, api_url : str, method: str, endpoint: str, params: Optional[dict] = None):
+    async def _req(self, api_url : str, method: str, endpoint: str, params: Optional[dict] = None, token: Optional[str] = None, *args, **kwargs):
         headers = {}
-        if self.token:
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        elif self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         async with self.http.request(
             method, f"{api_url}{endpoint}", params=params, headers=headers
@@ -153,14 +155,14 @@ class SaladClient(Methods):
                 self.http.cookie_jar.update_cookies(r.cookies)
                 self.http.cookie_jar.save(self.cachePath)
 
-    async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None):
-        resp = await self._req(api_url, "GET", endpoint, params)
+    async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None, **kwargs):
+        resp = await self._req(api_url, "GET", endpoint, params, **kwargs)
         if resp == 404:
             return resp
         return json.loads(resp)
 
-    async def _post(self, api_url: str, endpoint: str, params: Optional[dict] = None):
-        resp = await self._req(api_url, "POST", endpoint, params)
+    async def _post(self, api_url: str, endpoint: str, params: Optional[dict] = None, **kwargs):
+        resp = await self._req(api_url, "POST", endpoint, params, **kwargs)
         if resp == 404:
             return resp
         return json.loads(resp)
