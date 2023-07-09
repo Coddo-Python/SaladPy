@@ -10,6 +10,10 @@ from .methods import Methods
 
 
 class SaladClient(Methods):
+    """The main client allowing you to use the rest of the library.
+    
+    NOTE: If using `token`, do not call login or verify
+    """
     V1_API_URL = "https://app-api.salad.com/api/v1/"
     V2_API_URL = "https://app-api.salad.com/api/v2/"
     AUTH_API_URL = "https://app-api.salad.com/auth/"
@@ -17,17 +21,20 @@ class SaladClient(Methods):
     def __init__(
         self,
         cachePath: Optional[Path] = None,
+        token: Optional[str] = None,
         *args,
         **kwargs,
     ):
         self.cachePath = cachePath
         self.cached = False
+        self.token = token
         self.http = ClientSession(*args, **kwargs)
-        if self.cachePath is not None:
-            if self.cachePath.exists():
-                if self.cachePath.stat().st_size > 0:  # File is not empty
-                    self.http.cookie_jar.load(self.cachePath)
-                    self.cached = True
+        if not token:
+            if self.cachePath is not None:
+                if self.cachePath.exists():
+                    if self.cachePath.stat().st_size > 0:  # File is not empty
+                        self.http.cookie_jar.load(self.cachePath)
+                        self.cached = True
                     
     @property
     def cookies(self):
@@ -112,8 +119,11 @@ class SaladClient(Methods):
                     return True
 
     async def _req(self, api_url : str, method: str, endpoint: str, params: Optional[dict] = None):
+        headers = {}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
         async with self.http.request(
-            method, f"{api_url}{endpoint}", params=params
+            method, f"{api_url}{endpoint}", params=params, headers=headers
         ) as r:
             text = await r.text()
             try:
