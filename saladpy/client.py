@@ -39,6 +39,9 @@ class SaladClient(Methods):
     @property
     def cookies(self):
         return {cookie.key: cookie.value for cookie in list(self.http.cookie_jar) }
+    
+    async def clear_cookies(self):
+        self.http.cookie_jar.clear()
                             
     async def close(self):
         """
@@ -125,7 +128,7 @@ class SaladClient(Methods):
         elif self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         async with self.http.request(
-            method, f"{api_url}{endpoint}", params=params, headers=headers
+            method, f"{api_url}{endpoint}", params=params, headers=headers, **kwargs
         ) as r:
             text = await r.text()
             try:
@@ -135,25 +138,22 @@ class SaladClient(Methods):
                     "try refresh token" in text
                 ):  # DO NOT convert to JSON as it's not always guaranteed to be JSON
                     # Refresh token
-                    print("Token expired, refreshing...")
-                    await self.refresh_token()
+                    await self.refresh_token(**kwargs)
                 else:
                     return r.status
             else:
                 return text
 
-    async def refresh_token(self):
-        #TODO: Test refresh token
-        self.temp_cookie_backup = self.cookies
-        cookies = {"sRefreshToken": self.cookies["sRefreshToken"], "sIdRefreshToken": self.cookies["sIdRefreshToken"]}
-        self.http.cookie_jar.clear()
-        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", cookies=cookies) as r:
-            print(r.status)
+    async def refresh_token(self, **kwargs):
+        headers = {
+            'rid': 'session'
+        }
+        async with self.http.post(f"{self.AUTH_API_URL}session/refresh", headers=headers, **kwargs) as r:
             text = await r.text()
-            print(text)
             if r.status == 200:
                 self.http.cookie_jar.update_cookies(r.cookies)
-                self.http.cookie_jar.save(self.cachePath)
+                if self.cachePath is not None:
+                    self.http.cookie_jar.save(self.cachePath)
 
     async def _get(self, api_url: str, endpoint: str, params: Optional[dict] = None, **kwargs):
         resp = await self._req(api_url, "GET", endpoint, params, **kwargs)
