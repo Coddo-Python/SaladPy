@@ -128,7 +128,7 @@ class SaladClient(Methods):
         elif self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         async with self.http.request(
-            method, f"{api_url}{endpoint}", params=params, headers=headers, **kwargs
+            method, f"{api_url}{endpoint}", params=params, headers=headers
         ) as r:
             text = await r.text()
             try:
@@ -139,6 +139,7 @@ class SaladClient(Methods):
                 ):  # DO NOT convert to JSON as it's not always guaranteed to be JSON
                     # Refresh token
                     await self.refresh_token(**kwargs)
+                    return await self._req(api_url, method, endpoint, params, token, *args, **kwargs)
                 else:
                     return r.status
             else:
